@@ -1,8 +1,9 @@
 //import liraries
 import React, { Component, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, Image, ImageBackground, TextInput, Feather } from 'react-native';
 import Loading from './loading';
 import { Ionicons } from '@expo/vector-icons';
+import { setStatusBarNetworkActivityIndicatorVisible } from 'expo-status-bar';
 
 // create a component
 
@@ -13,14 +14,30 @@ const Weather = () => {
 
     const [loading, setLoading] = useState(true)
     const [currentWeather, setCurrentWeather] = useState()
+    const [city, setCity] = useState('')
     const api_key = "063d4f97f5ee11764d23a46d02e7926d"
 
 
     const fetchData = () => {
-        fetch("https://api.openweathermap.org/data/2.5/weather?q=Cape Town&appid=" + api_key)
+        fetch("https://api.openweathermap.org/data/2.5/weather?q=" + "Tembisa" + "&appid=" + api_key)
             .then((response) => response.json())
             .then((data) => {
-                console.log(data.weather[0].icon)
+                console.log(data)
+                setCurrentWeather(data)
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .finally(() => setLoading(false))
+
+    }
+
+    const searchByCity = () => {
+        console.log(city);
+        fetch("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=" + api_key)
+            .then((response) => response.json())
+            .then((data) => {
+                console.log(data)
                 setCurrentWeather(data)
             })
             .catch((error) => {
@@ -36,6 +53,11 @@ const Weather = () => {
     }, [])
 
 
+   // const onPress = () => {
+    //    if (!city) {
+    //        alert('Nah')
+   //     }
+  //  }
 
 
     return (
@@ -45,15 +67,31 @@ const Weather = () => {
             {loading ? <Loading></Loading>
                 :
                 <div>
-                    <View style={{ display: 'flex', flexDirection: 'row', alignContent:'center', justifyContent: 'center', marginBottom: 100 }}>
-                        <Ionicons name="location-outline" size={32} color="#E42434" />
-                        <Text style={{ color: 'white', fontSize: 30 }}> {currentWeather.name} </Text>
+
+                    <View style={styles.form}>
+                        <View style={styles.inputCity} >
+                            <TextInput style={{ color: 'white', fontSize: 25 }}  placeholder='Search city...' onChangeText={(e) => setCity(e)} />
+                            <Ionicons name="search" style={styles.btn} size={30} color="lime" onPress={() => searchByCity()} />
+
+                        </View>
+                        
+
                     </View>
 
-                    <View style={{ flexDirection: 'row', alignItems:'center', justifyContent:'space-evenly'  }}>
-                        <Text style={{ color: 'white', fontSize: 20 }}>Today </Text>
 
-                        <View style={{flexDirection:'column'}}>
+
+
+
+
+                    <View style={{ display: 'flex', flexDirection: 'row', alignContent: 'center', justifyContent: 'center', marginBottom: 100, marginTop: 100 }}>
+                        <Ionicons name="location-outline" size={50} color="#E42434" />
+                        <Text style={{ color: 'white', fontSize: 50 }}> {currentWeather.name} </Text>
+                    </View>
+
+                    <View style={styles.subheading}>
+                        <Text style={{ color: 'white', fontSize: 25 }}>Today's weather </Text>
+
+                        <View >
 
                             <Text style={{ color: 'grey', fontSize: 18 }}> {new Date().toDateString()} </Text>
                             <Text style={{ color: 'grey', fontSize: 18 }}> {currentWeather.weather[0].description} </Text>
@@ -62,12 +100,28 @@ const Weather = () => {
 
                     </View>
 
-                    <View style={{ display: 'flex', flexDirection: 'row',alignItems:'center', justifyContent:'space-evenly'  }}>
+                    <View style={styles.wearther}>
                         <Image style={{ width: "200px", height: "200px", }} source={{ uri: "http://openweathermap.org/img/wn/" + currentWeather.weather?.[0].icon + "@2x.png " }} />
                         <Text style={{ color: 'white', fontSize: 30, }} >
                             {(currentWeather.main.temp - 273.15).toFixed(2)}
                             <span style={{ color: '#E42434' }}>c</span>
                         </Text>
+                    </View>
+
+                    <View>
+                        <View style={styles.Inlineweather}>
+
+                            <Text style={{  color: 'grey', fontSize: 15, fontWeight: 'bold' }}>Humidity:</Text>
+                            <Text style={{ color: 'white', fontSize: 30, }} >
+                                {(currentWeather.main.humidity)}%</Text>
+                        
+                        
+
+                            <Text style={{  color: 'grey', fontSize: 15, fontWeight: 'bold' }}>Wind:</Text>
+                            <Text style={{ color: 'white', fontSize: 30, }} >
+                                {(currentWeather.wind.speed)}km/h</Text>
+                        </View>
+
                     </View>
 
                 </div>
@@ -83,15 +137,53 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#142C54',
-        width: 400,
-        height: 150,
+        width: '100%',
+        height: '100%',
+     
+        borderColor: 'white',
+        borderWidth: 2,
+        //marginTop: 200,
+    },
+
+    subheading: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        borderColor: 'grey',
+        borderWidth: 2,
+        borderRadius: 10,
+
+    },
+    wearther: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+        borderColor: 'grey',
+        borderWidth: 2,
+        borderRadius: 10,
+        marginTop:50,
+        
+
+    },
+    inputCity: {
+        borderColor: 'lime',
+        borderWidth: 2,
+        borderRadius: 10,
+        flexDirection: 'row',
+        padding: 10,
+        justifyContent: 'space-between',
         display: 'flex',
     },
-    image:{
-        flex:1, 
-        resizeMode:"cover", 
-        justifyContent:"center"
-      }
+    Inlineweather: {
+        justifyContent: 'space-between',
+        flexDirection: 'row',
+        marginTop: 50,
+        paddingHorizontal: 15,
+       paddingVertical: 15,
+
+    },
+
 });
 
 //make this component available to the app
